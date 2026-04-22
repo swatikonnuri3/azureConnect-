@@ -1,0 +1,9 @@
+{
+	"name": "adf-swati",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "c35c1870-0942-4af1-a5b2-b158bea44889",
+		"tenantId": "ead03765-8b25-4bba-8673-79aa211d1a62"
+	}
+}
