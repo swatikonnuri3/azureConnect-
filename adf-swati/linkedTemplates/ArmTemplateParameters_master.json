@@ -5,11 +5,17 @@
 		"factoryName": {
 			"value": "adf-swati"
 		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
 		"AzureDatabricks1_accessToken": {
 			"value": ""
 		},
 		"linkedserviceDL_accountKey": {
 			"value": ""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://storage2forcopy.dfs.core.windows.net/"
 		},
 		"linkedserviceDL_properties_typeProperties_url": {
 			"value": "https://storage2forcopy.dfs.core.windows.net/"
