@@ -7,13 +7,16 @@
 		},
 		"parameters": {
 			"containerName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.sourceContainer"
 			},
 			"folderName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().parameters.folderName"
 			},
 			"fileName": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "*"
 			}
 		},
 		"annotations": [],
