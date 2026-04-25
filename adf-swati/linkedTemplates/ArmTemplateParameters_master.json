@@ -11,11 +11,17 @@
 		"AzureDatabricks1_accessToken": {
 			"value": ""
 		},
+		"LS_ADLS_SalesView_accountKey": {
+			"value": ""
+		},
 		"linkedserviceDL_accountKey": {
 			"value": ""
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://storage2forcopy.dfs.core.windows.net/"
+		},
+		"LS_ADLS_SalesView_properties_typeProperties_url": {
+			"value": "https://adfassignment.dfs.core.windows.net/"
 		},
 		"linkedserviceDL_properties_typeProperties_url": {
 			"value": "https://storage2forcopy.dfs.core.windows.net/"
