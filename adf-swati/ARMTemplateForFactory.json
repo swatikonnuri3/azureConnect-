@@ -77,6 +77,186 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_CopyLatestFiles_SalesView')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetMetadata_SourceFolder",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_Source_SalesView",
+								"type": "DatasetReference",
+								"parameters": {
+									"containerName": "@pipeline().parameters.sourceContainer",
+									"folderName": "@pipeline().parameters.folderName",
+									"fileName": "*"
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter_LatestFiles",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetMetadata_SourceFolder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetMetadata_SourceFolder').output.childItems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@greaterOrEquals(item().lastModified, pipeline().parameters.triggerDate)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEach_CopyFiles",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter_LatestFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter_LatestFiles').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_ToBronze",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_Source_SalesView",
+											"type": "DatasetReference",
+											"parameters": {
+												"containerName": "@pipeline().parameters.sourceContainer",
+												"folderName": "@pipeline().parameters.folderName",
+												"fileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_Bronze_SalesView",
+											"type": "DatasetReference",
+											"parameters": {
+												"containerName": "bronze",
+												"folderPath": "@concat('sales_view/', pipeline().parameters.folderName)",
+												"fileName": "@item().name"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"sourceContainer": {
+						"type": "string",
+						"defaultValue": "sales-view-devtst"
+					},
+					"folderName": {
+						"type": "string",
+						"defaultValue": "customer"
+					},
+					"triggerDate": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Source_SalesView')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Bronze_SalesView')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/copyactivityofadls')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -482,13 +662,16 @@
 				},
 				"parameters": {
 					"containerName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "@pipeline().parameters.sourceContainer"
 					},
 					"folderName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "@pipeline().parameters.folderName"
 					},
 					"fileName": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "*"
 					}
 				},
 				"annotations": [],
